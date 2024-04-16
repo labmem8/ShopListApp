@@ -17,7 +17,7 @@ import com.example.shoplistapp.presentation.ui.theme.ShopListAppTheme
 class MainActivity : ComponentActivity() {
 
     private lateinit var viewModel: MainViewModel
-
+    private var count = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -33,7 +33,11 @@ class MainActivity : ComponentActivity() {
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.shopList.observe(this) {
             Log.d("MainActivityTest", it.toString())
+            val item = it[0]
+            if (count==0){
+                count++
+                viewModel.editShopItem(item.id, enabled=false)
+            }
         }
-        viewModel.getShopList()
     }
 }

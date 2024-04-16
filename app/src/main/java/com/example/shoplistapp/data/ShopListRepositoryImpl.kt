@@ -1,10 +1,14 @@
 package com.example.shoplistapp.data
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.shoplistapp.domain.ShopItem
 import com.example.shoplistapp.domain.ShopListRepository
 import java.lang.RuntimeException
 
 object ShopListRepositoryImpl : ShopListRepository {
+
+    private val shopListLD = MutableLiveData<List<ShopItem>>()
 
     private val shopList = mutableListOf<ShopItem>()
     private var autoIncrementId = 0
@@ -12,7 +16,7 @@ object ShopListRepositoryImpl : ShopListRepository {
     init {
         for (i in 1..10){
             val item = ShopItem("Name $i",true, i)
-            shopList.add(item)
+            addShopItem(item)
         }
     }
 
@@ -23,6 +27,7 @@ object ShopListRepositoryImpl : ShopListRepository {
         }
 
         isAdded = shopList.add(item)
+        updateList()
 
         return isAdded
     }
@@ -32,11 +37,17 @@ object ShopListRepositoryImpl : ShopListRepository {
         item.count = count ?: item.count
         item.enabled = enabled ?: item.enabled
         item.name = name ?: item.name
+
+        updateList()
+
     }
 
     override fun removeShopItem(id: Int): Boolean {
         val item = getShopItem(id)
-        return shopList.remove(item)
+        val isRemoved = shopList.remove(item)
+
+        updateList()
+        return isRemoved
     }
 
     override fun getShopItem(id: Int): ShopItem {
@@ -45,7 +56,11 @@ object ShopListRepositoryImpl : ShopListRepository {
         } ?: throw RuntimeException("Element with id $id not found")
     }
 
-    override fun getShopList(): List<ShopItem> {
-        return shopList.toMutableList()
+    override fun getShopList():LiveData<List<ShopItem>> {
+        return shopListLD
+    }
+
+    private fun updateList() {
+        shopListLD.value = shopList.toList()
     }
 }
